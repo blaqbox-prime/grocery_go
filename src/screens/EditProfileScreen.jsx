@@ -64,7 +64,7 @@ const EditProfileScreen = () => {
     if (customer.status == 200) {
       ToastAndroid.show("Updated Successfully", ToastAndroid.LONG);
       dispatch(setUser(c_data));
-      navigation.navigate("HOME");
+      navigation.goBack();
     } else {
       ToastAndroid.show(c_data.error, ToastAndroid.CENTER);
     }

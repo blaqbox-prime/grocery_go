@@ -5,9 +5,6 @@ import { TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 
-const list = [1,2,3,4,5,6,7,8,9,10,11];
-
-
 const DashListedItems = ({title, products}) => {
 
   const navigation = useNavigation();

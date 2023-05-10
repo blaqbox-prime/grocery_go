@@ -19,7 +19,7 @@ const CartScreen = () => {
   
   const user = useSelector((state) => state.authUser.user)
   
-  console.log("Cart Screen User: " + user_id );
+  console.log("Cart Screen User: " + user._id );
   
   const [clearCart, clearCartOpt] = useClearCartMutation();
   
@@ -51,6 +51,7 @@ const CartScreen = () => {
             className=""
             onPress={async () => {
               const res = await clearCart(user._id).unwrap();
+              console.log(res);
             }}
           >
             <TrashIcon size={22} color={"red"} />
@@ -59,6 +60,6 @@ const CartScreen = () => {
               <Cart user_id={user._id}/>
     </SafeAreaView>
   );
-};y5
+};
 
 export default CartScreen;

@@ -7,7 +7,7 @@ const ProfileListItem = ({icon, text, onPress}) => {
    <TouchableOpacity 
    onPress={() => onPress()}
    >
-     <View className="flex-row items-center justify-between p-2 bg-white shadow-gray-900 shadow-lg rounded-lg mb-4">
+     <View className="flex-row items-center justify-between p-4 mx-2 bg-white shadow-gray-900 shadow-sm rounded-lg mb-4">
       <View className="flex-row items-center space-x-2">
         {icon}
         <Text className="font-medium text-gray-800">{text}</Text>

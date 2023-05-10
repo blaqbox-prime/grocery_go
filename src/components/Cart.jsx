@@ -1,25 +1,31 @@
 import { View, Text, ScrollView, TextInput, Alert, ToastAndroid } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native';
 import { useCreateOrderMutation } from '../redux/OrderSlice';
 import CartItemCard from './CartItemCard';
 import { TagIcon, TrashIcon } from 'react-native-heroicons/outline';
 import { TouchableOpacity } from 'react-native';
 import { useGetCartQuery, useRemoveFromCartMutation } from '../redux/CartSlice';
-import { RandString } from '../config';
+import { API_URL, RandString } from '../config';
 import { useSelector } from 'react-redux';
 import { ListItem } from '@rneui/base';
+import { cartApi } from '../redux/CartSlice'; 
+import * as Animatable from 'react-native-animatable'
+import ProgressIndicator from './ProgressIndicator';
 
 const Cart = ({user_id}) => {
 
-    const {data,error,status} = useGetCartQuery(user_id)
+    // const {data,error,status} = useGetCartQuery(user_id)
     const user = useSelector((state) => state.authUser.user);
+    const [getCart, { data, isLoading, error }] = cartApi.useLazyGetCartQuery();
 
-    console.log(data)
-  
-  const [createOrder, createOrderOpt] = useCreateOrderMutation();
+    useEffect(() => {
+      getCart(user_id)
+      
+    }, [isLoading])
+      
+  // const [createOrder, createOrderOpt] = useCreateOrderMutation();
   const [removeItem, removeItemOpt] = useRemoveFromCartMutation();
-  
   
   const navigation = useNavigation();
   const DEFAULT_DELIVERY_CHARGE = 9.99;
@@ -28,50 +34,82 @@ const Cart = ({user_id}) => {
   // CREATE ORDER
 
   const handleOnCheckoutPress = async () => {
-    const newOrder = {
-      date: new Date().toISOString().replace('Z', '+00:00'),
-      paymentMethod: "CARD",
-      address: user,
-      deliveryStatus: "Preparing",
-      deliveryFee: DEFAULT_DELIVERY_CHARGE,
-    } 
+    try {
+      const newOrder = {
+        date: new Date().toISOString().replace('Z', '+00:00'),
+        address: user.address,
+        customer: user,
+        deliveryStatus: "Preparing",
+        deliveryFee: DEFAULT_DELIVERY_CHARGE,
+        total: data?.total + DEFAULT_DELIVERY_CHARGE
+      } 
+  
+      console.log("New Order:\n" + JSON.stringify(newOrder) + "\n");
+  
+     if(data.cartItems.length > 0){
+      const res = await fetch(`${API_URL}/cart/checkout/${user._id}`,{
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newOrder)
+      });
+  
+      const result = await res.json();
+  
+      if(res.status == 200){
+        let order = result;
+        console.log("New Order:\n" + JSON.stringify(order) + "\n");
+  
+        navigation.navigate("Checkout", {order: order})
+      } else {
+        ToastAndroid.show(result.message, ToastAndroid.SHORT)
+      }
+     }
+      
+    } catch (error) {
+      console.log(error)
+      ToastAndroid.show("No internet connection", ToastAndroid.SHORT)
+    }
 
-    console.log(newOrder)
+  }
 
-     await createOrder({body:newOrder, id:user._id}).unwrap()
-     .then(({originalStatus, data}) => {
-        if (originalStatus == 200) {
-            Alert.alert(data);
-            navigation.navigate("Checkout")
-        }
-     }).catch(({originalStatus, data}) => {
-        if (originalStatus == 200) {
-            Alert.alert(data);
-            navigation.navigate("Checkout")
-        }
-     });
+  const handleRemoveItemFromCart = async (product_id, user_id) => {
+   try{const res = await fetch(`${API_URL}/cart/remove-from-cart`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': "application/json"
+      },
+      body: JSON.stringify({product_id: product_id, customer_id: user_id})
+    });
 
+    const data = await res.json();
+
+    if(res.status == 200){
+      getCart(product_id, user_id);
+      ToastAndroid.show(data.message, ToastAndroid.LONG)}
+    }
+
+    catch(err){
+      console.info(err)
+    }
   }
 
   return (
     <View className="flex-1">
-      <ScrollView>
+      <ScrollView >
+
+{isLoading && (<Animatable.View animation={"slideInDown"} iterationCount={1}  style={{paddingVertical:8, marginHorizontal:"auto"}}><ProgressIndicator/></Animatable.View>)}
+
         {
           data?.cartItems && data.cartItems.map(cartItem => {
             return (
               <ListItem.Swipeable key={cartItem.product._id}
-              // rightWidth={100}
+              style={{width: '100%'}}
               minSlideWidth={40}
               rightContent={() => (
                 <TouchableOpacity className="flex-1 items-center justify-center bg-gray-200"
-                onPress={async () => {
-                  await removeItem(cartItem.product_id, user_id).unwrap()
-                  .catch((error) => {
-                    if(error.originalStatus == 200){
-                      ToastAndroid.show("Removed from cart", ToastAndroid.SHORT)
-                    }
-                  })
-                }}
+                onPress={async () => {handleRemoveItemFromCart(cartItem.product._id, user._id)}}
                 >
                    <TrashIcon size={24} color={"red"} />
                 </TouchableOpacity>
@@ -121,7 +159,7 @@ const Cart = ({user_id}) => {
           <View className=" mb-2 mt-2 flex-row align-middle justify-between">
             <Text className="text-black text-lg font-extrabold">Total</Text>
 
-            <Text className="font-medium text-primary">{RandString.format(data?.total ?? 0)}</Text>
+            <Text className="font-medium text-primary">{RandString.format(data?.total + DEFAULT_DELIVERY_CHARGE ?? 0)}</Text>
           </View>
         </View>
 

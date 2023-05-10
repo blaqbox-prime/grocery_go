@@ -4,6 +4,7 @@ import {
   SafeAreaView,
   Button,
   TouchableOpacity,
+  ToastAndroid,
 } from "react-native";
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import {
@@ -12,7 +13,7 @@ import {
   useStripe,
   useConfirmPayment,
 } from "@stripe/stripe-react-native";
-import { API_URL } from "../config";
+import { API_URL, RandString } from "../config";
 import { ActivityIndicator } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { ArrowLeftIcon, ShoppingBagIcon } from "react-native-heroicons/outline";
@@ -23,38 +24,72 @@ import { CheckBox } from "@rneui/base";
 const PaymentScreen = () => {
   const navigation = useNavigation();
 
-  const [selectedSlot, setSlot] = useState("09:00 am");
   const [selectedDelivery, setDelivery] = useState(0);
+  const [selectedMethod, setPaymentMethod] = useState(0);
 
   const user = useSelector((state) => state.authUser.user);
-  // const {street, suburb, city, province} = user.address;
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const [loading, setLoading] = useState(false);
+  const {order} = useRoute().params;
 
-  // const {order} = useRoute().params;
+  // console.log("\n Order On Payment Screen load:\n" + JSON.stringify(order));
+    const methods = ["Cash",
+    "Credit Card",
+    "Debit Card"]
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, []);
-
-  const TIME_SLOTS = [
-    "09:00 am",
-    "10:00 am",
-    "11:00 am",
-    "12:00 pm",
-    "01:00 pm",
-    "02:00 pm",
-    "03:00 pm",
-    "04:00 pm",
-    "05:00 pm",
-  ];
+  const updatedOrder = order;
+  updatedOrder.deliveryMethod = selectedDelivery == 0 ? "Door Delivery" : "Pick Up"
+  updatedOrder.paymentMethod = methods[selectedMethod].toUpperCase() 
 
   const stripe = useStripe();
 
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
-  const [loading, setLoading] = useState(false);
+  console.log("\n--------------------------- Updated Order-----------------------\n" + JSON.stringify(updatedOrder) + "\n--------------------------- -----------------------\n");
 
-  const order_id = "644ee8577b6d384715d63422";
+
+  const UpdateOrderOnSuccessfulPayment = async () => {
+    try {
+      const res = await fetch(`${API_URL}/orders/${order.id}`,{
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        }, 
+        body: JSON.stringify(updatedOrder)
+      });
+
+      const result = await res.json();
+
+      if(res.status == 200){
+          console.info(result);
+      }else{
+      console.log(result)
+      ToastAndroid.show(result.message,ToastAndroid.SHORT)  
+      }
+
+    } catch (error) {
+      console.error(error);
+      ToastAndroid.show("Network Error",ToastAndroid.SHORT)
+    }
+  }
+
+
+
+  const updateOrder = async () => {
+
+if(selectedMethod == 0){
+  navigation.navigate("SuccessScreen");
+} else {
+
+  await openPaymentSheet();
+}
+    // console.log(updatedOrder);
+    // const updatedOrder = {
+    //   ...order,
+    //   timeSlot: selectedSlot.trim().concat(":00:00"),
+    //   deliveryMethod: selectedDelivery == 0 ? "Door Delivery" : "Pick Up"
+    // }
+
+  }
+
 
   const fetchPaymentSheetParams = async () => {
     const response = await fetch(`${API_URL}/payments/payment-sheet`, {
@@ -62,7 +97,7 @@ const PaymentScreen = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ order_id: order_id }),
+      body: JSON.stringify({ order_id: order.id }),
     });
     const { paymentIntent, ephemeralKey, customer } = await response.json();
 
@@ -92,7 +127,6 @@ const PaymentScreen = () => {
     if (!error) {
       setLoading(true);
     }
-    console.log(customer);
   };
 
   const openPaymentSheet = async () => {
@@ -101,12 +135,21 @@ const PaymentScreen = () => {
     // setLoading(false);
 
     if (error) {
-      // Alert.alert(`Error code: ${error.code}`, error.message);
+      ToastAndroid.show(error.message, ToastAndroid.SHORT);
     } else {
-      // Alert.alert("Success", "Your order is confirmed!");
-      navigation.navigate("SuccessScreen");
+      UpdateOrderOnSuccessfulPayment(updatedOrder).then((res) => {
+        if(res.status == 200){
+          navigation.navigate("SuccessScreen");
+        } else {
+          console.log(error);
+        }
+      }).catch((error) => {
+        console.log(error)
+      })
     }
   };
+
+
 
   useEffect(() => {
     initializePaymentSheet();
@@ -114,9 +157,10 @@ const PaymentScreen = () => {
 
   return (
     <StripeProvider publishableKey="pk_test_51LCX8ZFAAnynwhcg2dqoiV1PTQ6jBSEdMsafBIiSvBe90NaJsomEc4XZd4dxVcoQM5DePCobrzN5M7bFAm1LGtqX00qdfFC0Sx">
-      <SafeAreaView className="px-4 py-8 h-full">
+      <SafeAreaView className="px-4 py-8 h-full bg-white">
+       
         <View className="justify-between">
-          <View className="flex-row items-center justify-between my-8">
+          <View className="flex-row items-center justify-between mb-8">
             <TouchableOpacity className="" onPress={navigation.goBack}>
               <ArrowLeftIcon size={22} color={"black"} />
             </TouchableOpacity>
@@ -136,7 +180,31 @@ const PaymentScreen = () => {
             </TouchableOpacity>
           </View>
 
+          <ScrollView showsVerticalScrollIndicator={false}>
+
+          {/* Order Summary */}
+
+          <View className="bg-white shadow-lg shadow-gray-500 p-4 mb-2 rounded-lg flex-row items-center justify-between">
+            <View>
+              <Text className="text-lg font-medium">Order Summary</Text>
+              <Text className="font-medium" style={{ maxWidth: 200 }}>
+                {`#${order.id}`}
+              </Text>
+              
+                <Text className="font-medium pt-1">{user.firstName} {user.lastName}</Text>
+                <Text className="font-medium ">{user.email}</Text>
+                <Text className="font-medium ">{order.date}</Text>
+                <Text className="font-bold text-primary text-xl mt-2 ">{RandString.format(order.total)}</Text>
+            </View>
+            <View>
+              <Text className="font-bold text-gray-600"></Text>
+            </View>
+          </View>
+
+
           {/* {Address} */}
+
+
 
           <View className="bg-white shadow-lg shadow-gray-500 p-4 mb-2 rounded-lg flex-row items-center justify-between">
             <View>
@@ -154,42 +222,41 @@ const PaymentScreen = () => {
             </View>
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {/* Delivery Slot */}
+          <View className="mt-4">
+              <Text className="text-lg font-bold">Payment Method</Text>
+              <View className="bg-white rounded-lg">
+              
+              {
+                methods.map((method,idx) => (<TouchableOpacity key={idx} className="flex-row items-center space-x-1 border-b-2 border-gray-50"
+                onPress={() => {setPaymentMethod(idx)}}
+                >
+                <CheckBox
+                    checked={selectedMethod === idx}
+                    onPress={() => setPaymentMethod(idx)}
+                    checkedIcon="dot-circle-o"
+                    uncheckedIcon="circle-o"
+                  />
+                  <Text>{method}</Text>
+                </TouchableOpacity>))
+              }
 
-            <View className="mt-4">
-              <Text className="text-lg font-bold">Time Slot</Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                className="space-x-4 py-2"
+              {/* <TouchableOpacity className="flex-row items-center space-x-1"
+              onPress={() => {setPaymentMethod(1)}}
               >
-                {TIME_SLOTS.map((slot) => {
-                  return (
-                    <TouchableOpacity
-                      key={slot}
-                      onPress={() => {
-                        setSlot(slot);
-                      }}
-                    >
-                      <View
-                        className={`py-1 px-2 border border-primary rounded-lg ${
-                          selectedSlot == slot && "bg-primary"
-                        }`}
-                      >
-                        <Text
-                          className={`${selectedSlot == slot && "text-white"}`}
-                        >
-                          {slot}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </ScrollView>
+              <CheckBox
+                  checked={selectedMethod === 1}
+                  onPress={() => setPaymentMethod(1)}
+                  checkedIcon="dot-circle-o"
+                  uncheckedIcon="circle-o"
+                />
+                <Text>Cash</Text>
+              </TouchableOpacity> */}
+
+              </View>
             </View>
 
-            {/* Payment Options */}
+           
+            {/* Delivery Options */}
 
             <View className="mt-4">
               <Text className="text-lg font-bold">Delivery Method</Text>
@@ -228,7 +295,7 @@ const PaymentScreen = () => {
         <View className="flex-row justify-center align-middle gap-1 mt-auto">
           <TouchableOpacity
             className="bg-primary flex-1 rounded-lg p-3"
-            onPress={openPaymentSheet}
+            onPress={updateOrder}
             disabled={!loading}
           >
             <View className="justify-center align-middle flex-row">

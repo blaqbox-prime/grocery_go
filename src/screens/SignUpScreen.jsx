@@ -65,7 +65,7 @@ const SignUpScreen = () => {
 
       if (customer.status == 200) {
         dispatch(setUser(c_data));
-        navigation.navigate("Signin");
+        // navigation.navigate("Signin");
       } else {
         ToastAndroid.show(c_data.error, ToastAndroid.CENTER);
       }
@@ -132,7 +132,7 @@ const SignUpScreen = () => {
 
   const renderPageTwo = () => {
     return (
-      <Animatable.View animation={"slideInLeft"} iterationCount={1}>
+      <Animatable.View animation={"slideInLeft"} iterationCount={1} delay={2}>
         <View className="h-full bg-white p-4">
           <ScrollView className="">
             <View className="justify-center mb-8 mt-8 items-center">
@@ -200,7 +200,7 @@ const SignUpScreen = () => {
 
   const renderPageThree = () => {
     return (
-      <Animatable.View animation={"slideInLeft"} iterationCount={1}>
+      <Animatable.View animation={"slideInLeft"} iterationCount={1} delay={2}>
         <View className="relative h-full bg-white p-4">
           <ScrollView>
             <View className="justify-center mb-8 mt-8 items-center">

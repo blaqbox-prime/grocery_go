@@ -43,7 +43,7 @@ const navigation = useNavigation();
           </View>
         </View>
 
-            <View className="bg-white shadow-gray-600 shadow-2xl rounded-lg p-4 space-y-6 mb-6">
+            <View className="bg-white shadow-gray-600 shadow-sm rounded-lg p-4 mx-2 space-y-6 mb-6">
                 <View className="">
                 <Text className="text-primary font-bold text-lg">Email</Text>
                 <Text className="text-gray-500 text-xs">{user.email}</Text>
@@ -57,7 +57,7 @@ const navigation = useNavigation();
                 <Text className="text-gray-500 text-xs">{user.phone}</Text>
                 </View>
             </View>
-            <View className="bg-white p-4 h-24 rounded-lg space-y-2 ">
+            <View className="bg-white p-4 h-24 rounded-lg space-y-2 m-2 shadow-sm shadow-gray-200 ">
                     <View className="flex-row items-center justify-between">
                         <Text className="text-lg font-medium">Address</Text>
                         <TouchableOpacity>

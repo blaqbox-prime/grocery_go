@@ -6,12 +6,14 @@ import { ScrollView } from "react-native";
 import { Image } from "react-native";
 import {
   ArrowLeftIcon,
+  ArrowRightOnRectangleIcon,
   CreditCardIcon,
   HeartIcon,
   InformationCircleIcon,
   MapIcon,
   MapPinIcon,
   PhoneIcon,
+  QuestionMarkCircleIcon,
   UserIcon,
 } from "react-native-heroicons/outline";
 import ProfileListItem from "./../components/ProfileListItem";
@@ -77,7 +79,7 @@ const ProfileScreen = () => {
         />
         <ProfileListItem
           text={"Help"}
-          icon={<InformationCircleIcon size={16} color={"#009B37"} />}
+          icon={<QuestionMarkCircleIcon size={16} color={"#009B37"} />}
             onPress={() => {}}
         />
         <ProfileListItem
@@ -87,7 +89,7 @@ const ProfileScreen = () => {
         />
         <ProfileListItem
           text={"Log Out"}
-          icon={<InformationCircleIcon size={16} color={"#009B37"} />}
+          icon={<ArrowRightOnRectangleIcon size={16} color={"#009B37"} />}
             onPress={() => {dispatch(setUser(null))}}
         />
       </ScrollView>

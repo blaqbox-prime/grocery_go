@@ -12,12 +12,8 @@ import ProfileDetailsScreen from './../screens/ProfileDetailsScreen';
 import SuccessScreen from '../screens/SuccessScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import ProductsInCategoryScreen from '../screens/ProductsInCategoryScreen';
-import ProductFormScreen from '../screens/ProductFormScreen';
-import ManageProductsScreen from '../screens/ManageProductsScreen';
 import ShoppingListsScreen from '../screens/ShoppingListsScreen';
 import MyOrderSceren from './../screens/MyOrderScreen';
-import SignInScreen from '../screens/SignInScreen';
-import SignUpScreen from '../screens/SignUpScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 
 
@@ -33,9 +29,6 @@ const StackNavigator = () => {
           <Stack.Screen name="Products" component={ProductListScreen} options={{headerShown: false,}}/>
           <Stack.Screen name="ProductsInCategory" component={ProductsInCategoryScreen} options={{headerShown: false,}}/>
           <Stack.Screen name="Cart" component={CartScreen} options={{headerShown: false,}}/>
-          <Stack.Screen name="Dashboard" component={DashboardScreen} options={{headerShown:false}}/>
-          <Stack.Screen name="CreateProduct" component={ProductFormScreen} options={{headerShown: false,}}/>
-          <Stack.Screen name="ManageProducts" component={ManageProductsScreen} options={{headerShown: false,}}/>
           <Stack.Screen name="Profile" component={ProfileScreen} options={{headerShown: false,}}/>
           <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{headerShown: false,}}/>
           <Stack.Screen name="ProfileDetails" component={ProfileDetailsScreen} options={{headerShown: false,}}/>

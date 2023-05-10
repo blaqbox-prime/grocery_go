@@ -15,7 +15,7 @@ export const productApi = createApi({
     createProduct: builder.mutation({
       query: (product) => ({
         url: '/products/update',
-        method: 'POST',
+        method: 'PATCH',
         body: product,
       }),
     }),

@@ -5,7 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import React, { useLayoutEffect } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import {
   ArrowLeftIcon,
@@ -23,22 +23,46 @@ import {
 import { useSelector } from "react-redux";
 import * as Progress from "react-native-progress";
 
-const ProductsInCategoryScreen = ({ route }) => {
-//   const cart = useSelector((state) => state.cartApi.cart);
+const ProductsInCategoryScreen = ({ route , admin=false}) => {
+  //  const cart = useSelector((state) => state.cartApi.cart);
 
-//   console.log(cart)
 
   const navigation = useNavigation();
   const { category } = route.params;
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, [navigation]);
 
   const { data, error, isLoading, status } =
     useGetProductsByCategoryQuery(category);
+
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filtered, setFiltered] = useState([]);
+
+
+    const debounce = (func, delay) => {
+      let timeoutId;
+      return function (...args) {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        timeoutId = setTimeout(() => {
+          func.apply(this, args);
+        }, delay);
+      };
+    };
+
+    const handleFilterProducts = debounce((searchTerm) => {
+      console.log(searchTerm);
+    
+      if (searchTerm.length > 0) {
+        const filteredProducts = data && data.filter((product) => {
+          return product.name.toLowerCase().includes(searchTerm.toLowerCase());
+        });
+        setFiltered(filteredProducts);
+      } else {
+        setFiltered([]);
+      }
+    }, 500);
+
 
   return isLoading ? (
     <View className="flex-1 items-center justify-center">
@@ -74,13 +98,25 @@ const ProductsInCategoryScreen = ({ route }) => {
           <TextInput
             placeholder="Search for your favorite item"
             keyboardType="default"
+            onChangeText={(text) => {
+              setSearchTerm(text);
+              handleFilterProducts(text)
+            }}
           />
         </View>
       </View>
       <ScrollView className="" showsVerticalScrollIndicator={false}>
-        {data?.map((prod) => (
-          <ProductListingCard key={prod._id} product={prod} />
-        ))}
+      {
+            (filtered.length == 0 && searchTerm.length > 0) && <Text className="text-lg p-4 text-center">No items match your search</Text> 
+          }
+
+          {
+           filtered.length > 0 && filtered.map(prod => <ProductListingCard key={prod._id} product={prod} admin={admin} />)
+          }
+        
+          {
+           filtered.length == 0 && data?.map(prod => <ProductListingCard key={prod._id} product={prod} admin={admin} />)
+          }
       </ScrollView>
     </SafeAreaView>
   );

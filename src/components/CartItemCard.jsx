@@ -14,7 +14,7 @@ const CartItemCard = ({ cartItem }) => {
   const user = useSelector(state => state.authUser.user);
 
   const body = {
-    "customer_id": user._id ?? "644ee31156239445331cd710",
+    "customer_id": user._id,
     "product_id": product._id,
     "quantity": quantity,
   }
@@ -42,7 +42,8 @@ const CartItemCard = ({ cartItem }) => {
               <Text className="font-bold  text-sm text-primary">
                 {quantity < 10 ? `0${quantity}` : quantity}
               </Text>
-              <TouchableOpacity onPress={async () => { await incQty(body).unwrap().catch((error) => {
+              <TouchableOpacity onPress={async () => { 
+                await incQty(body).unwrap().catch((error) => {
                 if(error.originalStatus == 200){
                   ToastAndroid.show("added", ToastAndroid.SHORT);
                 }else {

@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import AuthNavigator from './AuthNavigator';
 import StackNavigator from './StackNavigator';
+import AdminNavigator from './AdminNavigator';
 
 const AppNavigation = () => {
 
@@ -13,7 +14,7 @@ const AppNavigation = () => {
   return (
     <SafeAreaProvider>
     <SafeAreaView className="flex-1">
-        {user == null ? <AuthNavigator /> : <StackNavigator />}
+        {user == null ? <AuthNavigator /> : user.role == "admin" ? <AdminNavigator/> : <StackNavigator />}
     </SafeAreaView>
     </SafeAreaProvider>
   )

@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   TextInput,
   SafeAreaView,
+  ToastAndroid,
 } from "react-native";
 import React, { useState } from "react";
 import { ArrowLeftIcon } from "react-native-heroicons/outline";
@@ -14,20 +15,55 @@ import { useNavigation } from "@react-navigation/native";
 import { ScrollView } from "react-native";
 import { defaultShoppingLists } from "./../helpers";
 import ProgressIndicator from "../components/ProgressIndicator";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { API_URL } from "../config";
+import { setUser } from "../redux/UserSlice";
 
 const ShoppingListsScreen = () => {
 
 
-  const user = useSelector();
+  const user = useSelector((state) => state.authUser.user);
 
   const [formShown, setFormShown] = useState(false);
-  const [shoppingLists, setShoppingLists] = useState(user.shoppingLists ?? []);
+  const [loading, setLoading] = useState(false);
 
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
+  const handleOnListCreate = async (title) => {
+      try{
+        setLoading(true)
+        const res = await fetch(`${API_URL}/customer/${user._id}/create-shopping-list`, {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: title,
+            items: []
+          })
+        });
+  
+        const results = await res.json();
+        
+        setLoading(false);
 
+        if(res.status == 200){
+          console.log(results)
+          dispatch(setUser({...user, shoppingLists: [ ...user.shoppingLists, results]}));
+          ToastAndroid.show(`${title} created successfully` , ToastAndroid.SHORT);
+          setFormShown(false)
+        }else {
+          ToastAndroid.show(results.message, ToastAndroid.SHORT);
+          setFormShown(false)
+        }
 
+      } catch (err) {
+        console.error(err);
+        ToastAndroid.show("Network Error: Try again later", ToastAndroid.SHORT);
+      }
+
+  }
 
 
   return (
@@ -40,7 +76,7 @@ const ShoppingListsScreen = () => {
         <View className="aspect-square w-5"></View>
       </View>
 
-      {shoppingLists.length === 0 && <Text className="p-4 mx-auto text-center text-lg font-medium text-gray-400">No orders here yet.</Text>}
+      {user && user?.shoppingLists?.length === 0 && <Text className="p-4 mx-auto text-center text-lg font-medium text-gray-400">No shopping lists here yet.</Text>}
           
 
       {loading ? (
@@ -50,12 +86,13 @@ const ShoppingListsScreen = () => {
       ) :
 
       (<ScrollView showsVerticalScrollIndicator={false}>
-        {defaultShoppingLists.map((list, idx) => {
+        {user && user?.shoppingLists?.map((list, idx) => {
           return (
             <TouchableOpacity key={idx} onPress={() => {}}>
-              <Card>
-                <Card.Title>{list.title}</Card.Title>
-              </Card>
+              <View className="my-2 flex-row items-center justify-between">
+                <Text className="font-medium">{list.title}</Text>
+                <Text className="font-medium text-gray-400 shadow-sm shadow-gray-300" >{list.items.length}</Text>
+              </View>
             </TouchableOpacity>
           );
         })}
@@ -75,6 +112,8 @@ const ShoppingListsScreen = () => {
           onCancel={() => {
             setFormShown(false);
           }}
+
+          onCreate={handleOnListCreate}
         />
       </BottomSheet>
     </SafeAreaView>

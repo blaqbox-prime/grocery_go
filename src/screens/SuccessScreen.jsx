@@ -10,28 +10,30 @@ const SuccessScreen = () => {
   useEffect(() => {
     setTimeout(() => {
       navigation.navigate("Home");
-    }, 1500);
+    }, 5000);
   }, []);
 
   return (
-    <View className="bg-white flex-1 justify-center items-center p-4">
-      <View className="bg-transparent mx-auto my-auto">
+    <View className="bg-white justify-center items-center p-4 h-full">
+      <View className="bg-transparent mx-auto my-auto justify-center items-center">
         <Animatable.Image
           source={require("../../assets/images/successful.gif")}
           animation="slideInUp"
           iterationCount={1}
-          className="aspect-square w-96"
+          delay={2}
+          className="aspect-square  h-60"
         />
 
         <Animatable.Text
           animation="slideInUp"
           iterationCount={1}
-          className="text-primary text-lg font-bold text-center"
+          delay={1}
+          className="text-primary text-lg font-bold text-center mb-4"
         >
           Order successfully placed. Delivery will be made soon.
         </Animatable.Text>
 
-        <Progress.Circle size={60} indeterminate={true} color="#009B37" />
+        <Progress.Circle size={36} indeterminate={true} color="#009B37" />
       </View>
     </View>
   );

@@ -4,7 +4,7 @@ export default function CheckoutScreen() {
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
     const [loading, setLoading] = useState(false);
   
-    const order_id = "644ee8577b6d384715d63422";
+    // const order_id = "644ee8577b6d384715d63422";
 
     const fetchPaymentSheetParams = async () => {
       const response = await fetch(`${API_URL}/payment-sheet`, {

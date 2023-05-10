@@ -19,7 +19,7 @@ export const cartApi = createApi({
       query: (productId, customerId) => ({
         url: `/cart/remove-from-cart`,
         method: 'POST',
-        body: { "product_id" : productId, "customer_id" : customerId },
+        body: JSON.stringify({ "product_id" : productId, "customer_id" : customerId }),
       }),
       invalidatesTags: ['Cart'],
     }),
@@ -42,11 +42,12 @@ export const { useAddToCartMutation, useRemoveFromCartMutation, useClearCartMuta
 export const cartSlice = createSlice({
   name: 'cart',
   initialState: {
-    items: [],
+    cart: {},
     status: 'idle',
     error: null,
   },
-  reducers: {},
+  reducers: {
+  },
   extraReducers: (builder) => {
     builder
       .addMatcher(isAnyOf(useGetCartQuery.pending), (state) => {
