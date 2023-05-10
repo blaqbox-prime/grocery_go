@@ -9,6 +9,7 @@ import Promotions from '../components/Promotions';
 import TopSelling from '../components/TopSelling';
 import { useSelector } from 'react-redux';
 import { useGetProductsQuery } from '../redux/ProductSlice';
+import MostReviewedProducts from '../components/MostReviewedProducts';
 
 
 const HomeScreen = () => {
@@ -29,7 +30,7 @@ const HomeScreen = () => {
     const {image, address} = user;
 
   return (
-    <SafeAreaView className="pt-8 px-4 bg-white">
+    <SafeAreaView className="pt-8 px-4 bg-white h-full">
       {/* HEADER */}
     
       <View className="flex-row items-center mb-4">
@@ -46,10 +47,9 @@ const HomeScreen = () => {
         />
       </TouchableOpacity>
         <View className="">
-            <Text className="text-lg font-bold">Delivery</Text>
+            <Text className="text-lg font-bold">{user.firstName}</Text>
             <View className="flex-row items-center space-x-1">
             <Text className="text-xs text-gray-500" >{address?.suburb}, {address?.city}</Text>
-            <ChevronDownIcon size={14} color="#009B37" /> 
             </View>
         </View>
       </View>
@@ -72,21 +72,6 @@ const HomeScreen = () => {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* SEARCH BOX */}
 
-        
-      {/* Search */}
-
-      <View className="flex-row items-center space-x-2 pb-2 ">
-        <View className="flex-row flex-1 space-x-2 bg-gray-200 p-3 items-center rounded-lg">
-          <MagnifyingGlassIcon color="#009B37" size={20}/>
-          <TextInput
-          placeholder="Search for your favorite item"
-          keyboardType="default"
-          />
-        </View>
-
-        <AdjustmentsHorizontalIcon color={"#009B37"} />
-      </View>
-
         {/* Categories */}
 
         <Categories />
@@ -95,9 +80,11 @@ const HomeScreen = () => {
 
         <Promotions />
 
+        <MostReviewedProducts />
+
         {/* Top Selling */}
 
-        {!isLoading && <TopSelling products={data}/>}
+        <TopSelling />
 
       </ScrollView>
     </SafeAreaView>
