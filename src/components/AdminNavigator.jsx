@@ -6,6 +6,7 @@ import ProductFormScreen from './../screens/ProductFormScreen';
 import ManageProductsScreen from './../screens/ManageProductsScreen';
 import ProductsInCategoryScreen from '../screens/ProductsInCategoryScreen';
 import ProductScreen from '../screens/ProductScreen';
+import OrdersScreen from '../screens/OrdersScreen';
 
 const Stack = createNativeStackNavigator()
 
@@ -17,6 +18,8 @@ const AdminNavigator = () => {
           <Stack.Screen name="Product" component={ProductScreen} options={{headerShown: false,}}/>
           <Stack.Screen name="ManageProducts" component={ManageProductsScreen} options={{headerShown: false,}}/>
           <Stack.Screen name="ProductsInCategory" component={ProductsInCategoryScreen} options={{headerShown: false,}}/>
+          <Stack.Screen name="Orders" component={OrdersScreen} options={{headerShown: false,}}/>
+
     </Stack.Navigator>
   )
 }

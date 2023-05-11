@@ -69,51 +69,7 @@ const MyOrderSceren = () => {
         <ScrollView className="space-y-2 flex-1">
           {orders.length === 0 && <Text className="p-4 mx-auto text-center text-lg font-medium text-gray-400">No orders here yet.</Text>}
           {
-            orders.map((order) => {
-              return (
-                <View className="shadow-gray-400 bg-white shadow my-4 rounded-lg border border-gray-200" >
-                  {/* Status */}
-                  <View>
-                  <View
-            className={`
-            mb-4
-            ${
-              order.deliveryStatus == "Completed"
-                ? "bg-primary"
-                : order.deliveryStatus == "Ready"
-                ? "bg-blue-500"
-                : order.deliveryStatus == "Preparing"
-                ? "bg-fuchsia-500"
-                : order.deliveryStatus == "Shipping"
-                ? "bg-yellow-500"
-                : "bg-orange-500"
-            } justify-center px-2 text-center`}
-          >
-            <Text className={`text-sm font-medium text-white`}>
-              {order.deliveryStatus}
-            </Text>
-          </View>
-                  </View>
-                  {/* order id */}
-                  <View className="flex-row items-center p-2 justify-between border-b-2 border-gray-100 mb-1"> 
-                    <Text>Order ID</Text>
-                    <Text>#{order.id}</Text>
-                  </View>
-                  {/* order list items count */}
-                  <View className="flex-row items-center p-2 justify-between border-b-2 border-gray-100 mb-1"> 
-                    <Text>Order List</Text>
-                    <Text>2</Text>
-                  </View>
-                  {/* order total */}
-                  <View className="flex-row items-center p-2 justify-between border-b-2 border-gray-100 mb-1"> 
-                    <Text>Total Bill</Text>
-                    <Text>{RandString.format(order.total)}</Text>
-                  </View>
-                  {/* view order status */}
-                  <PrimaryButton title={"Track Order"} onPress={() => {}}/>
-                </View>
-              );
-            })
+            orders.map((order) => <DashOrderCard key={order.id} order={order} isAdmin={false} />)
           }
         </ScrollView>
       )}

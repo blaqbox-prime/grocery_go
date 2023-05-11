@@ -1,93 +1,76 @@
-import { View, Text, SafeAreaView, ToastAndroid } from 'react-native'
-import React, { useLayoutEffect } from 'react'
+import { View, Text, SafeAreaView, ToastAndroid, ScrollView } from 'react-native'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native';
 import { API_URL } from '../config';
 import ProgressIndicator from '../components/ProgressIndicator';
+import { TouchableOpacity } from 'react-native';
+import DashOrderCard from '../components/DashOrderCard';
+import { ArrowLeftIcon } from 'react-native-heroicons/outline';
 
-const OrdersScreen = ({admin=false}) => {
+const OrdersScreen = () => {
 
-    const user = useSelector((state) => state.authUser.user);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-    // Fetch Orders 
+  const getOrders = async () => {
+    setLoading(true);
+    const res = await fetch(`${API_URL}/orders/`);
+    const data = await res.json();
 
-    const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(false);
-
-    const getOrders = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`${API_URL}/orders/`);
-      
-      setLoading(false);
-      const data = await res.json();
-      if (res.statusCode == 200){
-         setOrders(data);
-         console.log(data);  
-      } else {
-        ToastAndroid.show(data.message, ToastAndroid.SHORT)
-      }      
-    } catch (error) {
-      ToastAndroid.show("No internet connection, please try again", ToastAndroid.SHORT)
+    setLoading(false);
+    if (res.status == 200) {
+      data.sort((a,b) => Date.parse(a.date) < Date.parse(b.date))
+      setOrders(data);
+      // console.log(data);
+    } else {
+      console.log(data);
     }
-    } 
+  };
 
 
+  // include navigation
+  const navigation = useNavigation();
 
-    // include navigation
-    const navigation = useNavigation()
 
-   
+  useEffect(() => {
+   getOrders();
+  }, [])
+  
 
   return (
-    <SafeAreaView className="px-4 py-6 bg-white h-full">
-      <View className="flex-row items-center justify-between my-4">
+    <SafeAreaView className="p-4 bg-white h-full">
+
+      <View className="flex-row items-center justify-between my-2">
+
       <TouchableOpacity
             className=""
             onPress={navigation.goBack}
           >
-            <ArrowLeftIcon size={22} color={"black"} />
+            <ArrowLeftIcon size={20} color={"black"} />
           </TouchableOpacity>
 
-        <Text className="font-bold text-lg">Products</Text>
+          <Text className="text-lg font-medium">Orders</Text>
 
-        <TouchableOpacity
-            className=""
-            onPress={ () => navigation.navigate("CreateProduct",{product:emptyProduct})}
-          >
-            <PlusIcon size={22} color={"black"} />
-          </TouchableOpacity>
-
+          <View className="aspect-square w-5"></View>
 
       </View>
-        <ScrollView className="" showsVerticalScrollIndicator={false}>
 
-          {
-            loading && (
-              <View className="w-full py-3 items-center justify-center">
-                <Animatable.View
-                animation={"slideInDown"}
-                iterationCount={1}
 
-              >
-                <View className="items-center justify-center py-3">
-                <ProgressIndicator />
-                </View>
-              </Animatable.View>
-              </View>
-            )
-          }
-
+      {/* LIST ALL OF THE ORDERS */}
+      {(loading && orders.length == 0) ? (
+        <View className="items-center justify-center my-4">
+          <ProgressIndicator />
+        </View>
+      ) : (
+        <ScrollView className="space-y-2 flex-1">
+          {orders.length === 0 && <Text className="p-4 mx-auto text-center text-lg font-medium text-gray-400">No orders here yet.</Text>}
           {
-            orders.length == 0 && <Text className="text-lg p-4 text-center">No items match your search</Text> 
+            orders.map((order) => <DashOrderCard key={order.id} order={order} isAdmin={true} callback={getOrders} />)
           }
-        
-          {
-           orders.length > 0 && orders.map((order,idx) => <OrderCard admin={admin} order={order}/>)
-          }
-        
         </ScrollView>
+      )}
     </SafeAreaView>
-  )
+  );
 }
 
 export default OrdersScreen

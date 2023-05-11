@@ -54,6 +54,20 @@ const getProductCount = async () => {
 
 }
 
+const getOrderCount = async () => {
+  const res = await fetch(`${API_URL}/orders/completed/count`);
+
+  const data = await res.json();
+
+  if(res.status == 200){
+    console.log(data.count);
+    setOrderCount(data.count);
+  } else {
+    console.log(data)
+  }
+
+}
+
 
 
 
@@ -62,6 +76,7 @@ useEffect(() => {
   const unsubscribe = navigation.addListener('focus', () => {
     getPopularProducts();
     getProductCount();
+    getOrderCount();
   });
 
   return unsubscribe;
@@ -102,11 +117,11 @@ useEffect(() => {
             <View className="items-top justify-between flex-row py-2">
 
               <View>
-              <Text className="text-4xl font-bold">14</Text>
+              <Text className="text-4xl font-bold">{ordersCount}</Text>
               <Text className="font-bold text-gray-400">Orders Completed</Text>
               </View>
 
-              <TouchableOpacity >
+              <TouchableOpacity onPress={() => {navigation.navigate("Orders")}}>
              <Text Text className="text-primary text-sm">Manage Orders</Text>
              </TouchableOpacity>
 
